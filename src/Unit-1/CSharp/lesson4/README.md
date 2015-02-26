@@ -33,8 +33,6 @@ Both of these concepts are important, but for the rest of this lesson we'll put 
 
 How is this achieved? **Supervision.**
 
-**Further Reading: [How Akka.NET Actors Recover from Failure](http://petabridge.com/blog/how-actors-recover-from-failure-hierarchy-and-supervision/).**
-
 ### What is supervision? Why should I care?
 Supervision is the basic concept that allows your actor system to quickly isolate and recover from failures.
 
@@ -105,8 +103,9 @@ Now, let's make child actors for `a2` by creating them inside the context of `a2
 
 ```csharp
 // create the children of actor a2
-ActorRef b1 = a2.ActorOf(Props.Create<BasicActor>(), "b1");
-ActorRef b2 = a2.ActorOf(Props.Create<BasicActor>(), "b2");
+// this is inside actor a2
+ActorRef b1 = Context.ActorOf(Props.Create<BasicActor>(), "b1");
+ActorRef b2 = Context.ActorOf(Props.Create<BasicActor>(), "b2");
 ```
 
 #### Actor path == actor position in hierarchy
@@ -432,10 +431,11 @@ In `Main()`, create a new `ActorRef` for `TailCoordinatorActor` and then pass it
 ```csharp
 // Program.Main
 // make tail coordinator & pass to fileValidatorActorProps
-var tailCoordinatorProps = Props.Create(() => new TailCoordinatorActor());
+Props tailCoordinatorProps = Props.Create(() => new TailCoordinatorActor());
 ActorRef tailCoordinatorActor = MyActorSystem.ActorOf(tailCoordinatorProps, "tailCoordinatorActor");
 
-var fileValidatorActorProps = Props.Create(() => new FileValidatorActor(consoleWriterActor, tailCoordinatorActor));
+// just adding `tailCoordinatorActor` arg to this Props
+Props fileValidatorActorProps = Props.Create(() => new FileValidatorActor(consoleWriterActor, tailCoordinatorActor));
 ActorRef validationActor = MyActorSystem.ActorOf(fileValidatorActorProps, "validationActor");
 ```
 
